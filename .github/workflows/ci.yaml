@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./quiz-app
+        working-directory: ./quiz-web-app
     strategy:
       matrix:
         node-version: [20.x]
@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v4
 
       - name: Install project dependencies 
-        working-directory: ./quiz-app
+        working-directory: ./quiz-web-app
         run: |
           npm i
           npm run lint
@@ -34,7 +34,7 @@ jobs:
 
       - name: Build
         run: npm run build
-        working-directory: ./quiz-app
+        working-directory: ./quiz-web-app
 
               # Setup sonar-scanner
       - name: Setup SonarQube
@@ -46,7 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectBaseDir: quiz-app
+          projectBaseDir: quiz-web-app
           args: >
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./quiz-app
+        working-directory: ./quiz-web-app
     steps:
       - uses: actions/checkout@master
       - name: Run Snyk to check for vulnerabilities
@@ -169,7 +169,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Build and push backend Docker image
-      working-directory: ./quiz-app
+      working-directory: ./quiz-web-app
       run: |
         docker build . -t ${{ secrets.DOCKER_USERNAME }}/frontend-js
         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin 
@@ -193,13 +193,13 @@ jobs:
   
     - name: Snyk Container monitor
       run: snyk container monitor ${{ secrets.DOCKER_USERNAME }}/frontend-js --file=Dockerfile   
-      working-directory: ./quiz-app
+      working-directory: ./quiz-web-app
 
     - name: Run Snyk to check for vulnerabilities in the Docker image
       uses: snyk/actions/docker@master
       with:
         image: ${{ secrets.DOCKER_USERNAME }}/frontend-js
-        args: --file=quiz-app/Dockerfile --severity-threshold=high
+        args: --file=quiz-web-app/Dockerfile --severity-threshold=high
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       continue-on-error: true
